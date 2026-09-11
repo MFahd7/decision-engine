@@ -21,7 +21,7 @@ flowchart TB
     RULES --> SIG
     DATA --> SIG
 
-    SIG[["Signal[]<br/>value · weight · confidence · freshnessSec<br/>source · asserts · gap"]]
+    SIG[["One Signal per fact<br/>value · weight · confidence · freshnessSec<br/>source · asserts · gap"]]
 
     subgraph pure["decide() — pure: same inputs, same verdict, forever"]
         direction TB
