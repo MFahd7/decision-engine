@@ -1,0 +1,364 @@
+[
+  {
+    "id": "deploy-canary-tier3-green",
+    "title": "Small canary, green build, someone awake",
+    "expect": "execute",
+    "note": "The routine case. A fresh green pipeline, a canary rollout, a written rollback plan and an on-call engineer who has acknowledged the rota. Nothing here needs a person.",
+    "envelope": {
+      "id": "dp_20260313_0001",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_afarrell", "role": "engineer", "authorityLevel": 1 },
+      "requestedAt": "2026-03-13T16:18:00Z",
+      "idempotencyKey": "dp-0001-a",
+      "payload": {
+        "service": { "name": "receipts-renderer", "tier": "tier3", "monthlyActiveUsers": 8000 },
+        "change": {
+          "prNumber": 4471,
+          "filesChanged": 3,
+          "linesChanged": 62,
+          "touchesMigrations": false,
+          "signed": true,
+          "description": "Copy change on the PDF footer plus a typo fix in the currency formatter. No behaviour change, covered by tests."
+        },
+        "ci": { "testsTotal": 812, "testsFailed": 0, "coverageDelta": 0.004, "pipelineFinishedAt": "2026-03-13T16:06:00Z", "flakyRetries": 0 },
+        "rollout": { "strategy": "canary", "rollbackPlan": "Halt canary and repoint to the previous image tag. One command, about 40 seconds." },
+        "oncall": { "available": true, "name": "N. Adeyemi", "confirmedAt": "2026-03-13T15:50:00Z" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 8000,
+        "changeFailureRate30d": 0.03,
+        "incidentActive": false,
+        "secretsDetected": false,
+        "regulatedService": false
+      }
+    }
+  },
+  {
+    "id": "deploy-friday-no-oncall",
+    "title": "Everything is green. It is Friday evening and nobody is on call.",
+    "expect": "defer",
+    "note": "The scenario this whole vocabulary exists for. Nothing is wrong, nothing is missing that a person could supply, and nobody needs to approve anything. The right answer is simply 'not now', with a time attached. A yes/no permission model has to answer this wrongly in one direction or the other.",
+    "envelope": {
+      "id": "dp_20260313_0002",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_jrocha", "role": "senior engineer", "authorityLevel": 3 },
+      "requestedAt": "2026-03-13T16:19:00Z",
+      "idempotencyKey": "dp-0002-a",
+      "payload": {
+        "service": { "name": "checkout-api", "tier": "tier1", "monthlyActiveUsers": 240000 },
+        "change": {
+          "prNumber": 9902,
+          "filesChanged": 11,
+          "linesChanged": 340,
+          "touchesMigrations": false,
+          "signed": true,
+          "description": "Adds retry with jitter to the payment provider client. Covered by tests, behind a feature flag defaulted off."
+        },
+        "ci": { "testsTotal": 3140, "testsFailed": 0, "coverageDelta": 0.011, "pipelineFinishedAt": "2026-03-13T15:58:00Z", "flakyRetries": 0 },
+        "rollout": { "strategy": "canary", "rollbackPlan": "Disable the feature flag, then repoint the canary. Flag kill is instant." },
+        "oncall": { "available": false, "name": "P. Lindqvist", "nextAvailableAt": "Monday 16 March, 09:00 UTC" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 240000,
+        "changeFailureRate30d": 0.06,
+        "incidentActive": false,
+        "secretsDetected": false,
+        "regulatedService": false
+      }
+    }
+  },
+  {
+    "id": "deploy-during-freeze",
+    "title": "Quarter-end change freeze",
+    "expect": "defer",
+    "note": "A freeze is not a prohibition. Modelling it as one is how organisations teach their engineers to route around freezes; modelling it as a deferral with an end time is how you keep both the freeze and the engineer's trust.",
+    "envelope": {
+      "id": "dp_20260313_0003",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_mokonkwo", "role": "staff engineer", "authorityLevel": 4 },
+      "requestedAt": "2026-03-13T14:02:00Z",
+      "idempotencyKey": "dp-0003-a",
+      "payload": {
+        "service": { "name": "ledger-writer", "tier": "tier1", "monthlyActiveUsers": 190000 },
+        "change": {
+          "prNumber": 5510,
+          "filesChanged": 2,
+          "linesChanged": 41,
+          "touchesMigrations": false,
+          "signed": true,
+          "description": "Bumps the reconciliation batch size from 500 to 2000. No behaviour change beyond throughput."
+        },
+        "ci": { "testsTotal": 2210, "testsFailed": 0, "coverageDelta": 0.0, "pipelineFinishedAt": "2026-03-13T13:44:00Z", "flakyRetries": 0 },
+        "rollout": { "strategy": "blue_green", "rollbackPlan": "Point traffic back at the blue stack." },
+        "oncall": { "available": true, "name": "S. Barros", "confirmedAt": "2026-03-13T13:00:00Z" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 190000,
+        "changeFailureRate30d": 0.04,
+        "deployFreeze": { "active": true, "reason": "quarter-end financial close", "endsAt": "1 April 2026, 00:00 UTC" },
+        "incidentActive": false,
+        "secretsDetected": false,
+        "regulatedService": true
+      }
+    }
+  },
+  {
+    "id": "deploy-during-incident",
+    "title": "Open incident on the same service",
+    "expect": "defer",
+    "note": "Adding a variable while people are debugging is how a one-hour incident becomes a four-hour one. The bar clears when the incident does.",
+    "envelope": {
+      "id": "dp_20260313_0004",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_jrocha", "role": "senior engineer", "authorityLevel": 3 },
+      "requestedAt": "2026-03-13T16:10:00Z",
+      "idempotencyKey": "dp-0004-a",
+      "payload": {
+        "service": { "name": "search-indexer", "tier": "tier2", "monthlyActiveUsers": 66000 },
+        "change": {
+          "prNumber": 7781,
+          "filesChanged": 5,
+          "linesChanged": 120,
+          "touchesMigrations": false,
+          "signed": true,
+          "description": "Adds a new analyzer for hyphenated tokens. Covered by tests."
+        },
+        "ci": { "testsTotal": 940, "testsFailed": 0, "coverageDelta": 0.006, "pipelineFinishedAt": "2026-03-13T16:02:00Z", "flakyRetries": 0 },
+        "rollout": { "strategy": "canary", "rollbackPlan": "Halt the canary and reindex from the previous snapshot." },
+        "oncall": { "available": true, "name": "R. Iqbal", "confirmedAt": "2026-03-13T16:00:00Z" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 66000,
+        "changeFailureRate30d": 0.05,
+        "incidentActive": true,
+        "secretsDetected": false,
+        "regulatedService": false
+      }
+    }
+  },
+  {
+    "id": "deploy-no-rollback-plan",
+    "title": "Tier-2 deploy with no plan for undoing it",
+    "expect": "ask",
+    "note": "A person can close this gap in one sentence, and that person is the one standing at the button. So the engine asks rather than escalating — escalation would waste a director's time on a question the requester can answer themselves.",
+    "envelope": {
+      "id": "dp_20260313_0005",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_jrocha", "role": "senior engineer", "authorityLevel": 3 },
+      "requestedAt": "2026-03-13T15:44:00Z",
+      "idempotencyKey": "dp-0005-a",
+      "payload": {
+        "service": { "name": "partner-sync-api", "tier": "tier2", "monthlyActiveUsers": 48000 },
+        "change": {
+          "prNumber": 6120,
+          "filesChanged": 8,
+          "linesChanged": 210,
+          "touchesMigrations": false,
+          "signed": true,
+          "description": "Swaps the session cache client library. Covered by tests."
+        },
+        "ci": { "testsTotal": 1880, "testsFailed": 0, "coverageDelta": 0.002, "pipelineFinishedAt": "2026-03-13T15:36:00Z", "flakyRetries": 0 },
+        "rollout": { "strategy": "canary" },
+        "oncall": { "available": true, "name": "N. Adeyemi", "confirmedAt": "2026-03-13T15:30:00Z" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 48000,
+        "changeFailureRate30d": 0.07,
+        "incidentActive": false,
+        "secretsDetected": false,
+        "regulatedService": false
+      }
+    }
+  },
+  {
+    "id": "deploy-irreversible-migration",
+    "title": "A migration with no way back",
+    "expect": "escalate",
+    "note": "Reversibility is a property of the rollout, not the code. The same diff behind a canary is trivially undoable; behind a column drop it is permanent, and permanence is what pushes this to a director regardless of how green the build is.",
+    "envelope": {
+      "id": "dp_20260313_0006",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_jrocha", "role": "senior engineer", "authorityLevel": 3 },
+      "requestedAt": "2026-03-13T15:10:00Z",
+      "idempotencyKey": "dp-0006-a",
+      "payload": {
+        "service": { "name": "billing-core", "tier": "tier1", "monthlyActiveUsers": 175000 },
+        "change": {
+          "prNumber": 8801,
+          "filesChanged": 14,
+          "linesChanged": 430,
+          "touchesMigrations": true,
+          "migrationReversible": false,
+          "signed": true,
+          "description": "Drops the legacy invoice_lines_v1 table and moves reads to v2. Schema change, no down-migration."
+        },
+        "ci": { "testsTotal": 2600, "testsFailed": 0, "coverageDelta": 0.009, "pipelineFinishedAt": "2026-03-13T15:00:00Z", "flakyRetries": 0 },
+        "rollout": { "strategy": "blue_green", "rollbackPlan": "Repoint to the blue stack — but note the schema will already be gone." },
+        "oncall": { "available": true, "name": "S. Barros", "confirmedAt": "2026-03-13T14:55:00Z" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 175000,
+        "changeFailureRate30d": 0.05,
+        "incidentActive": false,
+        "secretsDetected": false,
+        "regulatedService": false
+      }
+    }
+  },
+  {
+    "id": "deploy-stale-green-build",
+    "title": "The build is green. It is also from yesterday.",
+    "expect": "escalate",
+    "note": "The deploy-domain version of failure test A. A 19-hour-old pipeline is a statement about a base commit that main has moved well past. With a six-hour half-life the strongest evidence in the room barely registers, confidence falls through the floor, and the engine will not sign this off by itself.",
+    "envelope": {
+      "id": "dp_20260313_0007",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_afarrell", "role": "engineer", "authorityLevel": 1 },
+      "requestedAt": "2026-03-13T16:05:00Z",
+      "idempotencyKey": "dp-0007-a",
+      "payload": {
+        "service": { "name": "notifications-worker", "tier": "tier3", "monthlyActiveUsers": 45000 },
+        "change": {
+          "prNumber": 3320,
+          "filesChanged": 6,
+          "linesChanged": 180,
+          "touchesMigrations": false,
+          "signed": true,
+          "description": "Batches outbound webhooks. Refactor, no behaviour change intended."
+        },
+        "ci": { "testsTotal": 610, "testsFailed": 0, "coverageDelta": 0.001, "pipelineFinishedAt": "2026-03-12T21:20:00Z", "flakyRetries": 0 },
+        "rollout": { "strategy": "canary", "rollbackPlan": "Halt canary, repoint to previous tag." },
+        "oncall": { "available": true, "name": "R. Iqbal", "confirmedAt": "2026-03-13T16:00:00Z" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 45000,
+        "changeFailureRate30d": 0.08,
+        "incidentActive": false,
+        "secretsDetected": false,
+        "regulatedService": false
+      }
+    }
+  },
+  {
+    "id": "deploy-failing-tests-all-at-once",
+    "title": "Red build, no rollback, all traffic at once",
+    "expect": "escalate",
+    "note": "Nothing here is forbidden and nothing is missing. It simply never earns a green light, and R6 catches it. Note again that the engine escalates rather than refusing: a red build during a live outage is sometimes exactly the right deploy, and that judgement is not the kernel's to make.",
+    "envelope": {
+      "id": "dp_20260313_0008",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_afarrell", "role": "engineer", "authorityLevel": 1 },
+      "requestedAt": "2026-03-13T16:12:00Z",
+      "idempotencyKey": "dp-0008-a",
+      "payload": {
+        "service": { "name": "media-transcoder", "tier": "tier3", "monthlyActiveUsers": 22000 },
+        "change": {
+          "prNumber": 2109,
+          "filesChanged": 22,
+          "linesChanged": 1640,
+          "touchesMigrations": false,
+          "signed": true,
+          "description": "Risky rewrite of the frame scheduler. Not fully tested yet, revert if the queue backs up."
+        },
+        "ci": { "testsTotal": 480, "testsFailed": 37, "coverageDelta": -0.052, "pipelineFinishedAt": "2026-03-13T16:04:00Z", "flakyRetries": 3 },
+        "rollout": { "strategy": "all_at_once" },
+        "oncall": { "available": true, "name": "R. Iqbal", "confirmedAt": "2026-03-13T16:00:00Z" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 22000,
+        "changeFailureRate30d": 0.19,
+        "incidentActive": false,
+        "secretsDetected": false,
+        "regulatedService": false
+      }
+    }
+  },
+  {
+    "id": "deploy-secrets-in-diff",
+    "title": "A live credential in the diff",
+    "expect": "refuse",
+    "note": "Shipping this publishes the secret. There is no confidence level, no approver and no rollback plan that makes it acceptable, which is precisely why it is a prohibition and why the counterfactual panel offers nothing.",
+    "envelope": {
+      "id": "dp_20260313_0009",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_mokonkwo", "role": "staff engineer", "authorityLevel": 4 },
+      "requestedAt": "2026-03-13T15:30:00Z",
+      "idempotencyKey": "dp-0009-a",
+      "payload": {
+        "service": { "name": "partner-webhooks", "tier": "tier2", "monthlyActiveUsers": 31000 },
+        "change": {
+          "prNumber": 7003,
+          "filesChanged": 4,
+          "linesChanged": 88,
+          "touchesMigrations": false,
+          "signed": true,
+          "description": "Adds the sandbox partner integration. Config only."
+        },
+        "ci": { "testsTotal": 720, "testsFailed": 0, "coverageDelta": 0.003, "pipelineFinishedAt": "2026-03-13T15:22:00Z", "flakyRetries": 0 },
+        "rollout": { "strategy": "canary", "rollbackPlan": "Halt canary, repoint to previous tag." },
+        "oncall": { "available": true, "name": "S. Barros", "confirmedAt": "2026-03-13T15:20:00Z" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 31000,
+        "changeFailureRate30d": 0.04,
+        "incidentActive": false,
+        "secretsDetected": true,
+        "regulatedService": false
+      }
+    }
+  },
+  {
+    "id": "deploy-unsigned-commit-regulated",
+    "title": "Unsigned commit on an audited service",
+    "expect": "refuse",
+    "note": "A change-control obligation, not a risk judgement. The fix is to sign the commit, not to persuade the engine.",
+    "envelope": {
+      "id": "dp_20260313_0010",
+      "domain": "deploy",
+      "actionType": "deploy_to_prod",
+      "actor": { "id": "eng_mokonkwo", "role": "staff engineer", "authorityLevel": 4 },
+      "requestedAt": "2026-03-13T14:40:00Z",
+      "idempotencyKey": "dp-0010-a",
+      "payload": {
+        "service": { "name": "ledger-writer", "tier": "tier1", "monthlyActiveUsers": 190000 },
+        "change": {
+          "prNumber": 5511,
+          "filesChanged": 1,
+          "linesChanged": 9,
+          "touchesMigrations": false,
+          "signed": false,
+          "description": "One-line timeout bump. Trivial."
+        },
+        "ci": { "testsTotal": 2210, "testsFailed": 0, "coverageDelta": 0.0, "pipelineFinishedAt": "2026-03-13T14:30:00Z", "flakyRetries": 0 },
+        "rollout": { "strategy": "blue_green", "rollbackPlan": "Point traffic back at the blue stack." },
+        "oncall": { "available": true, "name": "S. Barros", "confirmedAt": "2026-03-13T14:20:00Z" }
+      },
+      "context": {
+        "now": "2026-03-13T16:20:00Z",
+        "blastRadiusUsers": 190000,
+        "changeFailureRate30d": 0.04,
+        "incidentActive": false,
+        "secretsDetected": false,
+        "regulatedService": true
+      }
+    }
+  }
+]

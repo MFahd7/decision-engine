@@ -1,0 +1,570 @@
+[
+  {
+    "id": "refund-damaged-with-photos",
+    "title": "Cracked mug, photos attached, store credit",
+    "expect": "execute",
+    "note": "The easy case, and worth having: a small, well-evidenced, nearly-free-to-undo refund should not need a human. If the engine cannot clear this one it is useless in production.",
+    "envelope": {
+      "id": "rf_20260312_0001",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "svc_autorefund", "role": "refund automation", "authorityLevel": 1 },
+      "requestedAt": "2026-03-12T15:38:11Z",
+      "idempotencyKey": "rf-0001-a",
+      "payload": {
+        "order": { "id": "SO-884120", "total": 42.99, "currency": "USD", "placedAt": "2026-03-05T11:02:00Z", "category": "homeware" },
+        "refund": {
+          "amount": 38.0,
+          "reason": "item_damaged",
+          "customerMessage": "The mug arrived broken - there's a crack right down the handle and it was like that in the box. Photos attached. Happy with store credit."
+        },
+        "fulfillment": {
+          "status": "delivered",
+          "statusObservedAt": "2026-03-10T15:40:00Z",
+          "carrier": { "status": "delivered", "observedAt": "2026-03-10T14:12:00Z" }
+        },
+        "evidence": { "photosProvided": true, "photoCount": 3, "photosUploadedAt": "2026-03-11T15:40:00Z" },
+        "customer": { "id": "cus_41182", "tenureDays": 812, "orders12mo": 14, "refunds12mo": 0, "chargebacks12mo": 0 },
+        "payout": { "rail": "store_credit", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.04,
+        "fraudScoreConfidence": 0.55,
+        "fraudScoreObservedAt": "2026-03-12T12:40:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-duplicate-charge",
+    "title": "Charged twice for one order",
+    "expect": "execute",
+    "note": "A ledger fact, not a judgement call. Confidence is near-total and never decays, because arithmetic does not go stale.",
+    "envelope": {
+      "id": "rf_20260312_0002",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "agent_rmendes", "role": "senior support agent", "authorityLevel": 2 },
+      "requestedAt": "2026-03-12T15:12:00Z",
+      "idempotencyKey": "rf-0002-a",
+      "payload": {
+        "order": { "id": "SO-883004", "total": 129.5, "currency": "USD", "placedAt": "2026-03-07T09:31:00Z", "category": "apparel" },
+        "refund": {
+          "amount": 129.5,
+          "reason": "duplicate_charge",
+          "customerMessage": "I've been charged twice for the same order - two identical amounts on my statement a minute apart. Only one jacket arrived."
+        },
+        "fulfillment": {
+          "status": "delivered",
+          "statusObservedAt": "2026-03-07T15:40:00Z",
+          "carrier": { "status": "delivered", "observedAt": "2026-03-07T15:20:00Z" }
+        },
+        "billing": { "duplicateChargeConfirmed": true },
+        "customer": { "id": "cus_20553", "tenureDays": 1490, "orders12mo": 6, "refunds12mo": 0, "chargebacks12mo": 0 },
+        "payout": { "rail": "card_reversal", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.02,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T14:40:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-stale-warehouse-receipt",
+    "title": "Warehouse says the return arrived. Six weeks ago. The carrier disagrees.",
+    "expect": "ask",
+    "note": "FAILURE TEST A. Our strongest-looking evidence is a warehouse receipt scan with 95% source confidence — and it is 41 days old, while a fresh carrier scan says the parcel is still moving. An engine that reads confidence without reading freshness pays out $1,240 here.",
+    "envelope": {
+      "id": "rf_20260312_0003",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "lead_tokafor", "role": "support lead", "authorityLevel": 3 },
+      "requestedAt": "2026-03-12T15:35:00Z",
+      "idempotencyKey": "rf-0003-a",
+      "payload": {
+        "order": { "id": "SO-871330", "total": 1240.0, "currency": "USD", "placedAt": "2026-01-18T13:20:00Z", "category": "electronics" },
+        "refund": {
+          "amount": 1240.0,
+          "reason": "return_sent_back",
+          "customerMessage": "I sent the laptop back weeks ago and still haven't seen the money. Can you check where it is?"
+        },
+        "fulfillment": {
+          "status": "delivered",
+          "statusObservedAt": "2026-01-24T10:05:00Z",
+          "carrier": { "status": "delivered", "observedAt": "2026-01-24T09:48:00Z" }
+        },
+        "returnLeg": {
+          "warehouseReceiptAt": "2026-01-30T15:40:00Z",
+          "carrierStatus": "in_transit_to_warehouse",
+          "carrierObservedAt": "2026-03-12T09:40:00Z",
+          "trackingNumber": null
+        },
+        "customer": { "id": "cus_77341", "tenureDays": 402, "orders12mo": 9, "refunds12mo": 1, "chargebacks12mo": 0 },
+        "payout": { "rail": "card_reversal", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 60,
+        "fraudScore": 0.18,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T13:40:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-damage-claim-no-photos",
+    "title": "Damage claim with nothing to look at",
+    "expect": "ask",
+    "note": "The gap is blocking and a person can close it in thirty seconds, so the engine asks rather than escalating. The question it produces is the literal sentence to send.",
+    "envelope": {
+      "id": "rf_20260312_0004",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "agent_rmendes", "role": "senior support agent", "authorityLevel": 2 },
+      "requestedAt": "2026-03-12T15:20:00Z",
+      "idempotencyKey": "rf-0004-a",
+      "payload": {
+        "order": { "id": "SO-884477", "total": 210.0, "currency": "USD", "placedAt": "2026-03-01T16:44:00Z", "category": "furniture" },
+        "refund": {
+          "amount": 210.0,
+          "reason": "item_damaged",
+          "customerMessage": "The shelf turned up damaged. I'd like a refund please."
+        },
+        "fulfillment": {
+          "status": "delivered",
+          "statusObservedAt": "2026-03-09T11:20:00Z",
+          "carrier": { "status": "delivered", "observedAt": "2026-03-09T11:02:00Z" }
+        },
+        "evidence": { "photosProvided": false },
+        "customer": { "id": "cus_63220", "tenureDays": 96, "orders12mo": 3, "refunds12mo": 0, "chargebacks12mo": 0 },
+        "payout": { "rail": "card_reversal", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.11,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T14:10:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-payout-account-unverified",
+    "title": "Nothing missing that a person could supply",
+    "expect": "defer",
+    "note": "The distinction the five-verdict vocabulary exists for. Asking the customer would be rude and useless — the processor is verifying the account and will finish on its own.",
+    "envelope": {
+      "id": "rf_20260312_0005",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "agent_rmendes", "role": "senior support agent", "authorityLevel": 2 },
+      "requestedAt": "2026-03-12T15:05:00Z",
+      "idempotencyKey": "rf-0005-a",
+      "payload": {
+        "order": { "id": "SO-884001", "total": 340.0, "currency": "USD", "placedAt": "2026-02-28T08:15:00Z", "category": "electronics" },
+        "refund": {
+          "amount": 340.0,
+          "reason": "item_not_received",
+          "customerMessage": "The headphones never turned up. Tracking stopped moving over a week ago."
+        },
+        "fulfillment": {
+          "status": "lost",
+          "statusObservedAt": "2026-03-11T15:40:00Z",
+          "carrier": { "status": "no_scan_since_depot", "observedAt": "2026-03-11T07:30:00Z" }
+        },
+        "customer": { "id": "cus_58810", "tenureDays": 640, "orders12mo": 11, "refunds12mo": 1, "chargebacks12mo": 0 },
+        "payout": { "rail": "instant_bank", "verified": false, "verificationEta": "2026-03-13T12:00:00Z" }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.09,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T13:00:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-charge-not-settled",
+    "title": "There is nothing to reverse yet",
+    "expect": "defer",
+    "note": "A temporal bar rather than a gap. The world is not missing information — it is simply too early, and the engine says when to come back.",
+    "envelope": {
+      "id": "rf_20260312_0006",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "agent_hkim", "role": "support agent", "authorityLevel": 1 },
+      "requestedAt": "2026-03-12T15:33:00Z",
+      "idempotencyKey": "rf-0006-a",
+      "payload": {
+        "order": { "id": "SO-884901", "total": 88.0, "currency": "USD", "placedAt": "2026-03-12T09:02:00Z", "category": "grocery" },
+        "refund": {
+          "amount": 88.0,
+          "reason": "item_not_received",
+          "customerMessage": "Order never arrived and the driver marked it delivered. Nothing outside."
+        },
+        "fulfillment": {
+          "status": "returned_to_sender",
+          "statusObservedAt": "2026-03-12T14:40:00Z",
+          "carrier": { "status": "returned_to_sender", "observedAt": "2026-03-12T14:31:00Z" }
+        },
+        "customer": { "id": "cus_90114", "tenureDays": 55, "orders12mo": 4, "refunds12mo": 0, "chargebacks12mo": 0 },
+        "payout": { "rail": "card_reversal", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.07,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T15:00:00Z",
+        "chargeSettled": false,
+        "settlementEta": "13 March 2026, 09:00 UTC",
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-above-authority-ceiling",
+    "title": "Clear-cut, well evidenced, and still not this agent's call",
+    "expect": "escalate",
+    "note": "Authority is not a function of confidence. This request is in good order; it is simply larger than one senior agent signs off alone, and the point of the ceiling is accountability rather than doubt.",
+    "envelope": {
+      "id": "rf_20260312_0007",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "agent_rmendes", "role": "senior support agent", "authorityLevel": 2 },
+      "requestedAt": "2026-03-12T14:50:00Z",
+      "idempotencyKey": "rf-0007-a",
+      "payload": {
+        "order": { "id": "SO-882290", "total": 2850.0, "currency": "USD", "placedAt": "2026-02-21T10:00:00Z", "category": "electronics" },
+        "refund": {
+          "amount": 2850.0,
+          "reason": "item_not_received",
+          "customerMessage": "The camera kit never arrived. The carrier has confirmed to me it was lost at the sorting hub."
+        },
+        "fulfillment": {
+          "status": "lost",
+          "statusObservedAt": "2026-03-11T09:00:00Z",
+          "carrier": { "status": "lost_in_transit", "observedAt": "2026-03-11T08:44:00Z" }
+        },
+        "customer": { "id": "cus_11002", "tenureDays": 2100, "orders12mo": 22, "refunds12mo": 1, "chargebacks12mo": 0 },
+        "payout": { "rail": "card_reversal", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.06,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T11:40:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-instant-payout-unrecoverable",
+    "title": "Same money, irreversible rail",
+    "expect": "escalate",
+    "note": "Nothing about the claim changed — only the payout rail. An instant bank transfer cannot be clawed back, so the same $900 carries roughly six times the cost of being wrong and crosses the ceiling on its own.",
+    "envelope": {
+      "id": "rf_20260312_0008",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "lead_tokafor", "role": "support lead", "authorityLevel": 3 },
+      "requestedAt": "2026-03-12T15:01:00Z",
+      "idempotencyKey": "rf-0008-a",
+      "payload": {
+        "order": { "id": "SO-883771", "total": 900.0, "currency": "USD", "placedAt": "2026-02-25T19:22:00Z", "category": "electronics" },
+        "refund": {
+          "amount": 900.0,
+          "reason": "item_not_received",
+          "customerMessage": "Never arrived. I want it paid straight to my bank account, not as credit."
+        },
+        "fulfillment": {
+          "status": "lost",
+          "statusObservedAt": "2026-03-10T12:00:00Z",
+          "carrier": { "status": "no_scan_since_depot", "observedAt": "2026-03-10T11:30:00Z" }
+        },
+        "customer": { "id": "cus_30994", "tenureDays": 140, "orders12mo": 8, "refunds12mo": 3, "chargebacks12mo": 0 },
+        "payout": { "rail": "instant_bank", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.3,
+        "fraudScoreConfidence": 0.62,
+        "fraudScoreObservedAt": "2026-03-12T14:40:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-open-chargeback",
+    "title": "The bank is already deciding this one",
+    "expect": "refuse",
+    "note": "Refunding into an open dispute pays the customer twice and forfeits the case. No quantity of evidence makes it correct, which is exactly what separates refuse from escalate.",
+    "envelope": {
+      "id": "rf_20260312_0009",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "lead_tokafor", "role": "support lead", "authorityLevel": 3 },
+      "requestedAt": "2026-03-12T13:44:00Z",
+      "idempotencyKey": "rf-0009-a",
+      "payload": {
+        "order": { "id": "SO-879004", "total": 415.0, "currency": "USD", "placedAt": "2026-02-14T14:00:00Z", "category": "apparel" },
+        "refund": {
+          "amount": 415.0,
+          "reason": "item_not_received",
+          "customerMessage": "Still nothing. I've also raised it with my bank."
+        },
+        "fulfillment": {
+          "status": "lost",
+          "statusObservedAt": "2026-03-09T10:00:00Z",
+          "carrier": { "status": "lost_in_transit", "observedAt": "2026-03-09T09:50:00Z" }
+        },
+        "customer": { "id": "cus_44821", "tenureDays": 300, "orders12mo": 5, "refunds12mo": 1, "chargebacks12mo": 1 },
+        "payout": { "rail": "card_reversal", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "chargebackInProgress": true,
+        "fraudScore": 0.22,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T12:00:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-sanctions-match",
+    "title": "Paying this out would be illegal",
+    "expect": "refuse",
+    "note": "The one category where the engine's answer is not a risk judgement at all.",
+    "envelope": {
+      "id": "rf_20260312_0010",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "lead_tokafor", "role": "support lead", "authorityLevel": 3 },
+      "requestedAt": "2026-03-12T12:10:00Z",
+      "idempotencyKey": "rf-0010-a",
+      "payload": {
+        "order": { "id": "SO-880110", "total": 260.0, "currency": "USD", "placedAt": "2026-03-02T07:00:00Z", "category": "industrial" },
+        "refund": {
+          "amount": 260.0,
+          "reason": "item_not_received",
+          "customerMessage": "Package never arrived, please refund to the account on file."
+        },
+        "fulfillment": {
+          "status": "lost",
+          "statusObservedAt": "2026-03-11T18:00:00Z",
+          "carrier": { "status": "lost_in_transit", "observedAt": "2026-03-11T17:40:00Z" }
+        },
+        "customer": { "id": "cus_99001", "tenureDays": 21, "orders12mo": 2, "refunds12mo": 0, "chargebacks12mo": 0 },
+        "payout": { "rail": "instant_bank", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "sanctionsHit": true,
+        "fraudScore": 0.4,
+        "fraudScoreConfidence": 0.65,
+        "fraudScoreObservedAt": "2026-03-12T11:00:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-store-credit-only-account",
+    "title": "Restricted account asking for cash",
+    "expect": "refuse",
+    "note": "A prior abuse finding restricted this account to store credit. The request is for a bank payout, which the restriction exists to prevent.",
+    "envelope": {
+      "id": "rf_20260312_0011",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "agent_rmendes", "role": "senior support agent", "authorityLevel": 2 },
+      "requestedAt": "2026-03-12T11:30:00Z",
+      "idempotencyKey": "rf-0011-a",
+      "payload": {
+        "order": { "id": "SO-881442", "total": 150.0, "currency": "USD", "placedAt": "2026-03-04T15:00:00Z", "category": "apparel" },
+        "refund": {
+          "amount": 150.0,
+          "reason": "item_damaged",
+          "customerMessage": "Arrived damaged again. Refund to my bank this time please, not credit."
+        },
+        "fulfillment": {
+          "status": "delivered",
+          "statusObservedAt": "2026-03-09T09:00:00Z",
+          "carrier": { "status": "delivered", "observedAt": "2026-03-09T08:50:00Z" }
+        },
+        "evidence": { "photosProvided": true, "photoCount": 1, "photosUploadedAt": "2026-03-12T10:00:00Z" },
+        "customer": { "id": "cus_70223", "tenureDays": 410, "orders12mo": 12, "refunds12mo": 7, "chargebacks12mo": 0 },
+        "payout": { "rail": "instant_bank", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "accountRestriction": "store_credit_only",
+        "fraudScore": 0.52,
+        "fraudScoreConfidence": 0.68,
+        "fraudScoreObservedAt": "2026-03-12T10:40:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-changed-mind-out-of-window",
+    "title": "Two months late, and the evidence is against it",
+    "expect": "escalate",
+    "note": "The R6 case. Nothing forbids this, nothing is missing, and no clock is running — the engine simply never earned a green light, so it hands the decision to a person. Note what it does NOT do: it does not refuse. 'The evidence looks bad' is a human's call, not the kernel's.",
+    "envelope": {
+      "id": "rf_20260312_0012",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "agent_hkim", "role": "support agent", "authorityLevel": 1 },
+      "requestedAt": "2026-03-12T10:15:00Z",
+      "idempotencyKey": "rf-0012-a",
+      "payload": {
+        "order": { "id": "SO-861002", "total": 75.0, "currency": "USD", "placedAt": "2025-12-30T12:00:00Z", "category": "apparel" },
+        "refund": {
+          "amount": 75.0,
+          "reason": "changed_mind",
+          "customerMessage": "I changed my mind about the coat, I don't need it any more. Can I still send it back?"
+        },
+        "fulfillment": {
+          "status": "delivered",
+          "statusObservedAt": "2026-01-07T15:40:00Z",
+          "carrier": { "status": "delivered", "observedAt": "2026-01-07T15:12:00Z" }
+        },
+        "customer": { "id": "cus_50310", "tenureDays": 900, "orders12mo": 7, "refunds12mo": 0, "chargebacks12mo": 0 },
+        "payout": { "rail": "store_credit", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.05,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T09:40:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": []
+      }
+    }
+  },
+  {
+    "id": "refund-split-attack-same-day",
+    "title": "The eleventh $450 refund today",
+    "expect": "escalate",
+    "note": "FAILURE TEST B, the half that works. On its own this request is unremarkable and sits comfortably inside a senior agent's authority. Judged against the $4,500 the same actor has already moved for this customer since midnight, it needs a director.",
+    "envelope": {
+      "id": "rf_20260312_0013",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "agent_dvoss", "role": "senior support agent", "authorityLevel": 2 },
+      "requestedAt": "2026-03-12T15:39:00Z",
+      "idempotencyKey": "rf-0013-a",
+      "payload": {
+        "order": { "id": "SO-884990", "total": 450.0, "currency": "USD", "placedAt": "2026-03-06T08:00:00Z", "category": "electronics" },
+        "refund": {
+          "amount": 450.0,
+          "reason": "item_not_received",
+          "customerMessage": "Another one that never arrived. Please refund."
+        },
+        "fulfillment": {
+          "status": "lost",
+          "statusObservedAt": "2026-03-12T08:00:00Z",
+          "carrier": { "status": "lost_in_transit", "observedAt": "2026-03-12T07:50:00Z" }
+        },
+        "customer": { "id": "cus_88888", "tenureDays": 46, "orders12mo": 19, "refunds12mo": 2, "chargebacks12mo": 0 },
+        "payout": { "rail": "card_reversal", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.24,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T15:20:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": [
+          { "amount": 450, "at": "2026-03-12T06:12:00Z", "subjectId": "cus_88888" },
+          { "amount": 450, "at": "2026-03-12T07:01:00Z", "subjectId": "cus_88888" },
+          { "amount": 450, "at": "2026-03-12T08:20:00Z", "subjectId": "cus_88888" },
+          { "amount": 450, "at": "2026-03-12T09:05:00Z", "subjectId": "cus_88888" },
+          { "amount": 450, "at": "2026-03-12T10:44:00Z", "subjectId": "cus_88888" },
+          { "amount": 450, "at": "2026-03-12T11:30:00Z", "subjectId": "cus_88888" },
+          { "amount": 450, "at": "2026-03-12T12:15:00Z", "subjectId": "cus_88888" },
+          { "amount": 450, "at": "2026-03-12T13:02:00Z", "subjectId": "cus_88888" },
+          { "amount": 450, "at": "2026-03-12T14:11:00Z", "subjectId": "cus_88888" },
+          { "amount": 450, "at": "2026-03-12T15:04:00Z", "subjectId": "cus_88888" }
+        ]
+      }
+    }
+  },
+  {
+    "id": "refund-split-attack-patient",
+    "title": "The same $4,950, taken slowly",
+    "expect": "execute",
+    "note": "FAILURE TEST B, the half that does not work, and the reason it is in the fixture set rather than hidden. Identical actor, identical customer, identical total — spread over five weeks instead of one day. The 24-hour window sees nothing, and the engine pays out. Fixing this needs identity resolution and cross-account linking the decision layer does not own.",
+    "envelope": {
+      "id": "rf_20260312_0014",
+      "domain": "refunds",
+      "actionType": "issue_refund",
+      "actor": { "id": "agent_dvoss", "role": "senior support agent", "authorityLevel": 2 },
+      "requestedAt": "2026-03-12T15:39:30Z",
+      "idempotencyKey": "rf-0014-a",
+      "payload": {
+        "order": { "id": "SO-884991", "total": 450.0, "currency": "USD", "placedAt": "2026-03-06T08:00:00Z", "category": "electronics" },
+        "refund": {
+          "amount": 450.0,
+          "reason": "item_not_received",
+          "customerMessage": "Another one that never arrived. Please refund."
+        },
+        "fulfillment": {
+          "status": "lost",
+          "statusObservedAt": "2026-03-12T08:00:00Z",
+          "carrier": { "status": "lost_in_transit", "observedAt": "2026-03-12T07:50:00Z" }
+        },
+        "customer": { "id": "cus_88889", "tenureDays": 46, "orders12mo": 19, "refunds12mo": 2, "chargebacks12mo": 0 },
+        "payout": { "rail": "card_reversal", "verified": true }
+      },
+      "context": {
+        "now": "2026-03-12T15:40:00Z",
+        "policyWindowDays": 30,
+        "fraudScore": 0.24,
+        "fraudScoreConfidence": 0.6,
+        "fraudScoreObservedAt": "2026-03-12T15:20:00Z",
+        "chargeSettled": true,
+        "priorActionsByActor": [
+          { "amount": 450, "at": "2026-02-05T09:00:00Z", "subjectId": "cus_88889" },
+          { "amount": 450, "at": "2026-02-08T09:00:00Z", "subjectId": "cus_88889" },
+          { "amount": 450, "at": "2026-02-12T09:00:00Z", "subjectId": "cus_88889" },
+          { "amount": 450, "at": "2026-02-15T09:00:00Z", "subjectId": "cus_88889" },
+          { "amount": 450, "at": "2026-02-19T09:00:00Z", "subjectId": "cus_88889" },
+          { "amount": 450, "at": "2026-02-23T09:00:00Z", "subjectId": "cus_88889" },
+          { "amount": 450, "at": "2026-02-27T09:00:00Z", "subjectId": "cus_88889" },
+          { "amount": 450, "at": "2026-03-02T09:00:00Z", "subjectId": "cus_88889" },
+          { "amount": 450, "at": "2026-03-06T09:00:00Z", "subjectId": "cus_88889" },
+          { "amount": 450, "at": "2026-03-10T09:00:00Z", "subjectId": "cus_88889" }
+        ]
+      }
+    }
+  }
+]

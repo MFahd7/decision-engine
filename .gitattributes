@@ -1,0 +1,4 @@
+# Normalise to LF in the repository so a clone behaves the same on any machine.
+* text=auto eol=lf
+*.png binary
+*.jpg binary

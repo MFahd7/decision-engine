@@ -1,0 +1,19 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+.env
+.env.local
+.env*.local
+
+# Local audit log. The engine seeds a fresh one on first run.
+/audit/data/*.jsonl
+
+.DS_Store
+Thumbs.db
+.vercel
+coverage/

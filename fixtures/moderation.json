@@ -1,0 +1,422 @@
+[
+  {
+    "id": "moderation-hash-match-label",
+    "title": "Byte-identical to something a human already ruled on",
+    "expect": "execute",
+    "note": "The only route by which this domain reaches a green light. The classifier's own certainty is capped at 0.75 before the kernel ever sees it, so no score on its own clears the 0.75 confidence floor — something a person already decided has to be in the mix. Here a hash match to a prior, appeal-tested case supplies it, and the action is a removable label.",
+    "envelope": {
+      "id": "md_20260314_0001",
+      "domain": "moderation",
+      "actionType": "label_post",
+      "actor": { "id": "mod_kbanda", "role": "moderator", "authorityLevel": 2 },
+      "requestedAt": "2026-03-14T20:08:00Z",
+      "idempotencyKey": "md-0001-a",
+      "payload": {
+        "post": {
+          "id": "p_5512099",
+          "authorId": "u_88120",
+          "language": "en",
+          "postedAt": "2026-03-14T14:02:00Z",
+          "text": "Same recycled graphic as always: we know where they live and people should go after them until they leave town.",
+          "reach": { "impressions": 4200, "followers": 610, "measuredAt": "2026-03-14T14:10:00Z" }
+        },
+        "action": { "type": "label", "permanence": "label" },
+        "classifier": { "label": "targeted_harassment", "score": 0.93, "selfConfidence": 0.8, "modelVersion": "harass-v9", "observedAt": "2026-03-14T18:10:00Z" },
+        "hashMatch": { "previouslyActioned": true, "caseId": "CASE-2026-01118", "actionedAt": "2026-02-22T20:10:00Z" },
+        "report": { "reasonGiven": "targeted harassment of a named person", "reporterCount": 14, "reportedAt": "2026-03-14T17:10:00Z" },
+        "authorStanding": { "accountAgeDays": 400, "priorStrikes": 1, "verified": false, "appealsUpheld": 0 },
+        "jurisdiction": { "code": "GB", "protectedSpeechCategory": false },
+        "contextFlags": {}
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": false,
+        "policyInGracePeriod": false
+      }
+    }
+  },
+  {
+    "id": "moderation-satire-vs-classifier",
+    "title": "The classifier is sure. It also missed the joke.",
+    "expect": "escalate",
+    "note": "A 0.91 score against a satire flag is not an average — it is two sources asserting opposite polarities of the same proposition, which the kernel detects generically and pays for in confidence. The reach then puts it above a moderator's ceiling.",
+    "envelope": {
+      "id": "md_20260314_0002",
+      "domain": "moderation",
+      "actionType": "limit_reach",
+      "actor": { "id": "mod_kbanda", "role": "moderator", "authorityLevel": 2 },
+      "requestedAt": "2026-03-14T19:40:00Z",
+      "idempotencyKey": "md-0002-a",
+      "payload": {
+        "post": {
+          "id": "p_5510044",
+          "authorId": "u_22910",
+          "language": "en",
+          "postedAt": "2026-03-14T11:20:00Z",
+          "text": "BREAKING: local council announces all pigeons will be issued photo ID by Friday. Anyone caught feeding an undocumented pigeon faces a stern letter.",
+          "reach": { "impressions": 128000, "followers": 41200, "measuredAt": "2026-03-14T18:40:00Z" }
+        },
+        "action": { "type": "limit_reach", "permanence": "soft_hide" },
+        "classifier": { "label": "coordinated_misinformation", "score": 0.91, "selfConfidence": 0.82, "modelVersion": "misinfo-v6", "observedAt": "2026-03-14T15:10:00Z" },
+        "report": { "reasonGiven": "spreading false information about council policy", "reporterCount": 61, "reportedAt": "2026-03-14T14:00:00Z" },
+        "authorStanding": { "accountAgeDays": 2100, "priorStrikes": 0, "verified": true, "appealsUpheld": 2 },
+        "jurisdiction": { "code": "GB", "protectedSpeechCategory": false },
+        "contextFlags": { "isSatire": true }
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": false,
+        "policyInGracePeriod": false
+      }
+    }
+  },
+  {
+    "id": "moderation-permanent-delete-high-reach",
+    "title": "Permanent deletion of something 340,000 people saw",
+    "expect": "escalate",
+    "note": "Reversibility is zero, so the cost of being wrong is the entire audience multiplied by everything we do not know. This is the clearest demonstration of why the cost formula multiplies by (1 - reversibility) rather than treating all actions alike.",
+    "envelope": {
+      "id": "md_20260314_0003",
+      "domain": "moderation",
+      "actionType": "remove_post",
+      "actor": { "id": "mod_lead_ferreira", "role": "moderation lead", "authorityLevel": 3 },
+      "requestedAt": "2026-03-14T19:02:00Z",
+      "idempotencyKey": "md-0003-a",
+      "payload": {
+        "post": {
+          "id": "p_5498001",
+          "authorId": "u_10044",
+          "language": "en",
+          "postedAt": "2026-03-13T09:00:00Z",
+          "text": "Thread on why the new housing rules are a disaster, with the addresses of the three councillors who voted for them so you can go after them.",
+          "reach": { "impressions": 340000, "followers": 88000, "measuredAt": "2026-03-14T19:00:00Z" }
+        },
+        "action": { "type": "remove_post", "permanence": "permanent_delete" },
+        "classifier": { "label": "doxxing", "score": 0.87, "selfConfidence": 0.79, "modelVersion": "harass-v9", "observedAt": "2026-03-14T10:00:00Z" },
+        "report": { "reasonGiven": "publishing home addresses with a call to confront", "reporterCount": 402, "reportedAt": "2026-03-13T10:30:00Z" },
+        "authorStanding": { "accountAgeDays": 1500, "priorStrikes": 2, "verified": false, "appealsUpheld": 0 },
+        "jurisdiction": { "code": "GB", "protectedSpeechCategory": false },
+        "contextFlags": {}
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": false,
+        "policyInGracePeriod": false
+      }
+    }
+  },
+  {
+    "id": "moderation-legal-hold",
+    "title": "Under a preservation order",
+    "expect": "refuse",
+    "note": "Deleting this destroys evidence. There is no confidence level and no approver that changes the answer, which is what makes it a prohibition rather than an escalation.",
+    "envelope": {
+      "id": "md_20260314_0004",
+      "domain": "moderation",
+      "actionType": "remove_post",
+      "actor": { "id": "mod_lead_ferreira", "role": "moderation lead", "authorityLevel": 3 },
+      "requestedAt": "2026-03-14T18:30:00Z",
+      "idempotencyKey": "md-0004-a",
+      "payload": {
+        "post": {
+          "id": "p_5401230",
+          "authorId": "u_67001",
+          "language": "en",
+          "postedAt": "2026-03-01T12:00:00Z",
+          "text": "Receipts from the group chat, screenshots attached. They knew and they said nothing.",
+          "reach": { "impressions": 92000, "followers": 15000, "measuredAt": "2026-03-14T18:00:00Z" }
+        },
+        "action": { "type": "remove_post", "permanence": "permanent_delete" },
+        "classifier": { "label": "privacy_violation", "score": 0.72, "selfConfidence": 0.66, "modelVersion": "privacy-v4", "observedAt": "2026-03-14T12:00:00Z" },
+        "report": { "reasonGiven": "sharing private messages without consent", "reporterCount": 22, "reportedAt": "2026-03-10T09:00:00Z" },
+        "authorStanding": { "accountAgeDays": 980, "priorStrikes": 0, "verified": false, "appealsUpheld": 0 },
+        "jurisdiction": { "code": "GB", "protectedSpeechCategory": false },
+        "contextFlags": {}
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": true,
+        "appealPending": false,
+        "policyInGracePeriod": false
+      }
+    }
+  },
+  {
+    "id": "moderation-appeal-pending-permanent-delete",
+    "title": "Deleting the thing that is under appeal",
+    "expect": "refuse",
+    "note": "An appeal that can be settled by destroying its subject is not an appeal. Note the shape of the rule: the same post could legitimately be hidden while the appeal runs — it is the permanence that is forbidden, not the action.",
+    "envelope": {
+      "id": "md_20260314_0005",
+      "domain": "moderation",
+      "actionType": "remove_post",
+      "actor": { "id": "mod_lead_ferreira", "role": "moderation lead", "authorityLevel": 3 },
+      "requestedAt": "2026-03-14T17:55:00Z",
+      "idempotencyKey": "md-0005-a",
+      "payload": {
+        "post": {
+          "id": "p_5388112",
+          "authorId": "u_33420",
+          "language": "en",
+          "postedAt": "2026-03-08T16:40:00Z",
+          "text": "Reposting my own thread after it was hidden. I still think the moderation call was wrong and here is why.",
+          "reach": { "impressions": 24000, "followers": 5200, "measuredAt": "2026-03-14T17:00:00Z" }
+        },
+        "action": { "type": "remove_post", "permanence": "permanent_delete" },
+        "classifier": { "label": "ban_evasion", "score": 0.69, "selfConfidence": 0.6, "modelVersion": "integrity-v3", "observedAt": "2026-03-14T09:00:00Z" },
+        "report": { "reasonGiven": "evading a prior moderation action", "reporterCount": 8, "reportedAt": "2026-03-09T08:00:00Z" },
+        "authorStanding": { "accountAgeDays": 1200, "priorStrikes": 1, "verified": false, "appealsUpheld": 1 },
+        "jurisdiction": { "code": "GB", "protectedSpeechCategory": false },
+        "contextFlags": {}
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": true,
+        "policyInGracePeriod": false
+      }
+    }
+  },
+  {
+    "id": "moderation-protected-speech-permanent-delete",
+    "title": "Protected category, permanent removal, no court order",
+    "expect": "refuse",
+    "note": "In this jurisdiction permanent removal of this category is a court's decision, not a platform's. The engine does not weigh it; it declines to be the body that decides.",
+    "envelope": {
+      "id": "md_20260314_0006",
+      "domain": "moderation",
+      "actionType": "remove_post",
+      "actor": { "id": "mod_lead_ferreira", "role": "moderation lead", "authorityLevel": 3 },
+      "requestedAt": "2026-03-14T16:20:00Z",
+      "idempotencyKey": "md-0006-a",
+      "payload": {
+        "post": {
+          "id": "p_5370881",
+          "authorId": "u_90211",
+          "language": "de",
+          "postedAt": "2026-03-12T08:00:00Z",
+          "text": "Rede vor dem Rathaus: die neue Verordnung ist ein Angriff auf die Versammlungsfreiheit und wir werden am Samstag wieder da sein.",
+          "reach": { "impressions": 51000, "followers": 9800, "measuredAt": "2026-03-14T16:00:00Z" }
+        },
+        "action": { "type": "remove_post", "permanence": "permanent_delete" },
+        "classifier": { "label": "incitement", "score": 0.64, "selfConfidence": 0.52, "modelVersion": "incite-v2", "observedAt": "2026-03-14T11:00:00Z" },
+        "report": { "reasonGiven": "organising an unlawful assembly", "reporterCount": 31, "reportedAt": "2026-03-12T19:00:00Z" },
+        "authorStanding": { "accountAgeDays": 3000, "priorStrikes": 0, "verified": true, "appealsUpheld": 0 },
+        "jurisdiction": { "code": "DE", "protectedSpeechCategory": true },
+        "contextFlags": { "isPublicFigureSpeech": true }
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt", "de"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": false,
+        "policyInGracePeriod": false
+      }
+    }
+  },
+  {
+    "id": "moderation-unsupported-language",
+    "title": "A classifier guessing in a language it does not speak",
+    "expect": "defer",
+    "note": "Nobody involved can answer this on demand. A native-speaking reviewer has to read it, and reviewers are a queue rather than a person you can ask — so the verdict is defer, not ask.",
+    "envelope": {
+      "id": "md_20260314_0007",
+      "domain": "moderation",
+      "actionType": "limit_reach",
+      "actor": { "id": "mod_kbanda", "role": "moderator", "authorityLevel": 2 },
+      "requestedAt": "2026-03-14T15:10:00Z",
+      "idempotencyKey": "md-0007-a",
+      "payload": {
+        "post": {
+          "id": "p_5361002",
+          "authorId": "u_45500",
+          "language": "am",
+          "postedAt": "2026-03-14T06:30:00Z",
+          "text": "የተላከው መልእክት ስለ ምርጫው ውጤት ነው። ሰዎች በሰላም እንዲወያዩ እንጠይቃለን።",
+          "reach": { "impressions": 12000, "followers": 3100, "measuredAt": "2026-03-14T14:30:00Z" }
+        },
+        "action": { "type": "limit_reach", "permanence": "soft_hide" },
+        "classifier": { "label": "election_misinformation", "score": 0.61, "selfConfidence": 0.44, "modelVersion": "misinfo-v6", "observedAt": "2026-03-14T09:00:00Z" },
+        "report": { "reasonGiven": "false claims about the election result", "reporterCount": 5, "reportedAt": "2026-03-14T08:00:00Z" },
+        "authorStanding": { "accountAgeDays": 700, "priorStrikes": 0, "verified": false, "appealsUpheld": 0 },
+        "jurisdiction": { "code": "ET", "protectedSpeechCategory": false },
+        "contextFlags": {}
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt", "de"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": false,
+        "policyInGracePeriod": false
+      }
+    }
+  },
+  {
+    "id": "moderation-policy-grace-period",
+    "title": "The rule it breaks is not in force yet",
+    "expect": "defer",
+    "note": "The post does break the rule. The rule was published nineteen hours ago and is not enforceable until tomorrow. Enforcing it early is not stricter, it is just wrong, and the engine says exactly when to come back.",
+    "envelope": {
+      "id": "md_20260314_0008",
+      "domain": "moderation",
+      "actionType": "label_post",
+      "actor": { "id": "mod_kbanda", "role": "moderator", "authorityLevel": 2 },
+      "requestedAt": "2026-03-14T14:00:00Z",
+      "idempotencyKey": "md-0008-a",
+      "payload": {
+        "post": {
+          "id": "p_5359441",
+          "authorId": "u_71230",
+          "language": "en",
+          "postedAt": "2026-03-14T07:15:00Z",
+          "text": "Undisclosed affiliate links in this whole thread, as usual. Buy through mine and I get a cut.",
+          "reach": { "impressions": 9000, "followers": 2400, "measuredAt": "2026-03-14T13:30:00Z" }
+        },
+        "action": { "type": "label", "permanence": "label" },
+        "classifier": { "label": "undisclosed_commercial", "score": 0.84, "selfConfidence": 0.71, "modelVersion": "commerce-v2", "observedAt": "2026-03-14T13:40:00Z" },
+        "report": { "reasonGiven": "undisclosed paid promotion", "reporterCount": 3, "reportedAt": "2026-03-14T12:00:00Z" },
+        "authorStanding": { "accountAgeDays": 260, "priorStrikes": 0, "verified": false, "appealsUpheld": 0 },
+        "jurisdiction": { "code": "GB", "protectedSpeechCategory": false },
+        "contextFlags": {}
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt", "de"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": false,
+        "policyInGracePeriod": true,
+        "policyEnforceableAt": "15 March 2026, 09:00 UTC"
+      }
+    }
+  },
+  {
+    "id": "moderation-report-without-reason",
+    "title": "Reported, with no reason given",
+    "expect": "ask",
+    "note": "Someone can answer this in one line, and until they do there is nothing specific to assess. Acting on an unarticulated report is how brigading works.",
+    "envelope": {
+      "id": "md_20260314_0009",
+      "domain": "moderation",
+      "actionType": "label_post",
+      "actor": { "id": "mod_kbanda", "role": "moderator", "authorityLevel": 2 },
+      "requestedAt": "2026-03-14T13:20:00Z",
+      "idempotencyKey": "md-0009-a",
+      "payload": {
+        "post": {
+          "id": "p_5350110",
+          "authorId": "u_50021",
+          "language": "en",
+          "postedAt": "2026-03-14T09:45:00Z",
+          "text": "Long post about allotment drainage, with photos of the trench I dug on Saturday.",
+          "reach": { "impressions": 3000, "followers": 810, "measuredAt": "2026-03-14T13:00:00Z" }
+        },
+        "action": { "type": "label", "permanence": "label" },
+        "classifier": { "label": "none", "score": 0.12, "selfConfidence": 0.58, "modelVersion": "harass-v9", "observedAt": "2026-03-14T12:50:00Z" },
+        "report": { "reporterCount": 19, "reportedAt": "2026-03-14T12:30:00Z" },
+        "authorStanding": { "accountAgeDays": 1800, "priorStrikes": 0, "verified": false, "appealsUpheld": 0 },
+        "jurisdiction": { "code": "GB", "protectedSpeechCategory": false },
+        "contextFlags": {}
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt", "de"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": false,
+        "policyInGracePeriod": false
+      }
+    }
+  },
+  {
+    "id": "moderation-thin-evidence",
+    "title": "A middling score and nothing else",
+    "expect": "escalate",
+    "note": "The R6 case for this domain. One borderline classifier output, no corroboration, no context flags, nothing missing that anyone could supply. It never earns a green light, so a person decides — and note the engine does not refuse, because 'not enough to act on' is not the same as 'forbidden'.",
+    "envelope": {
+      "id": "md_20260314_0010",
+      "domain": "moderation",
+      "actionType": "limit_reach",
+      "actor": { "id": "mod_kbanda", "role": "moderator", "authorityLevel": 2 },
+      "requestedAt": "2026-03-14T12:10:00Z",
+      "idempotencyKey": "md-0010-a",
+      "payload": {
+        "post": {
+          "id": "p_5341009",
+          "authorId": "u_60112",
+          "language": "en",
+          "postedAt": "2026-03-13T22:00:00Z",
+          "text": "Honestly the people running this scheme should be ashamed of themselves and I hope it collapses.",
+          "reach": { "impressions": 40000, "followers": 7700, "measuredAt": "2026-03-14T11:30:00Z" }
+        },
+        "action": { "type": "limit_reach", "permanence": "soft_hide" },
+        "classifier": { "label": "harassment", "score": 0.58, "selfConfidence": 0.55, "modelVersion": "harass-v9", "observedAt": "2026-03-14T02:00:00Z" },
+        "report": { "reasonGiven": "attacking the scheme organisers", "reporterCount": 2, "reportedAt": "2026-03-14T01:00:00Z" },
+        "authorStanding": { "accountAgeDays": 640, "priorStrikes": 0, "verified": false, "appealsUpheld": 0 },
+        "jurisdiction": { "code": "GB", "protectedSpeechCategory": false },
+        "contextFlags": {}
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt", "de"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": false,
+        "policyInGracePeriod": false
+      }
+    }
+  },
+  {
+    "id": "moderation-quoted-for-criticism",
+    "title": "Quoting the slur in order to condemn it",
+    "expect": "escalate",
+    "note": "The hardest genuine case in moderation and the one where a language model is actually the right tool: only a reader can tell using a phrase from quoting it. The classifier scores the words; the context signal asserts the opposite; the disagreement costs confidence rather than being averaged away.",
+    "envelope": {
+      "id": "md_20260314_0011",
+      "domain": "moderation",
+      "actionType": "limit_reach",
+      "actor": { "id": "mod_kbanda", "role": "moderator", "authorityLevel": 2 },
+      "requestedAt": "2026-03-14T11:05:00Z",
+      "idempotencyKey": "md-0011-a",
+      "payload": {
+        "post": {
+          "id": "p_5330777",
+          "authorId": "u_12008",
+          "language": "en",
+          "postedAt": "2026-03-14T08:20:00Z",
+          "text": "It is disgusting that anyone would say this in 2026. Screenshot below, quote is theirs, not mine, and I have reported it.",
+          "reach": { "impressions": 60000, "followers": 18000, "measuredAt": "2026-03-14T10:30:00Z" }
+        },
+        "action": { "type": "limit_reach", "permanence": "soft_hide" },
+        "classifier": { "label": "hate_speech", "score": 0.88, "selfConfidence": 0.84, "modelVersion": "hate-v11", "observedAt": "2026-03-14T09:00:00Z" },
+        "report": { "reasonGiven": "contains a slur", "reporterCount": 47, "reportedAt": "2026-03-14T08:50:00Z" },
+        "authorStanding": { "accountAgeDays": 2600, "priorStrikes": 0, "verified": true, "appealsUpheld": 1 },
+        "jurisdiction": { "code": "GB", "protectedSpeechCategory": false },
+        "contextFlags": { "isQuotedForCriticism": true, "isNewsReport": false }
+      },
+      "context": {
+        "now": "2026-03-14T20:10:00Z",
+        "classifierLanguages": ["en", "es", "pt", "de"],
+        "humanReviewQueueDepth": 340,
+        "legalHold": false,
+        "appealPending": false,
+        "policyInGracePeriod": false
+      }
+    }
+  }
+]
