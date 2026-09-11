@@ -9,6 +9,8 @@ kernel and three policy packs. Every decision carries the evidence it used, the 
 each piece, the rules it was tested against, what it would have taken to reach a different answer, and
 a hash-chained audit record.
 
+**Live demo: https://decision-engine-mofahds-projects.vercel.app**
+
 Built for the [DOO Builders League Decision Engine challenge](https://build.doo.ooo/challenges/decision-engine).
 
 ---
@@ -156,8 +158,9 @@ This single mechanism is what catches failure test A.
 
 ---
 
-Every scenario is deep-linkable. `#refund-stale-warehouse-receipt` on the end of the URL opens the
-failure-A case directly.
+Every scenario is deep-linkable, on the live demo as well as locally. The failure-A case opens
+directly at
+[/#refund-stale-warehouse-receipt](https://decision-engine-mofahds-projects.vercel.app/#refund-stale-warehouse-receipt).
 
 ---
 

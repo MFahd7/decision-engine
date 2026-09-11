@@ -59,6 +59,11 @@ Two things happen automatically on Vercel:
 If you *do* want the live model signal on the hosted demo, add `ANTHROPIC_API_KEY` in the Vercel
 project settings. Nothing else changes, and the console will say so in its header badge.
 
+**Deployment Protection must be off.** A new project can have Vercel Authentication enabled, which
+redirects every visitor to a Vercel login page. The brief disqualifies a non-functional demo, so
+check **Settings → Deployment Protection → Vercel Authentication → Disabled** and confirm the URL
+loads in a private window.
+
 ## 3. Before you submit, rehearse the clean clone
 
 The most common way to lose this challenge is a repository that does not run. Do it in a fresh
@@ -81,7 +86,7 @@ Then open the app and click through one scenario per domain.
 | Item | Where |
 |---|---|
 | Public repository, runnable from a clean clone | GitHub, step 1 |
-| Live demo URL | Vercel, step 2 |
+| Live demo URL | https://decision-engine-mofahds-projects.vercel.app — verified publicly reachable |
 | README with setup | [README.md](README.md) |
 | `.env.example` | [.env.example](.env.example) |
 | Architecture diagram / one-pager | [ARCHITECTURE.md](ARCHITECTURE.md) — two Mermaid diagrams, rendered by GitHub |
