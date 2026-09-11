@@ -96,7 +96,7 @@ Then open the app and click through one scenario per domain.
 | Intentional failure test case | `tests/failure-a.spec.ts` and `tests/failure-b.spec.ts` |
 | Two-year thesis, ≤300 words | [THESIS.md](THESIS.md) — 290 words |
 | Notes on AI tools, key decisions, scope limits | README, final section |
-| 90-second video | See below |
+| 90-second video | https://www.loom.com/share/eb9dfe81b7024942bbad12ae5ab05327 — verified public, no password |
 
 ## 5. The 90-second video
 

@@ -11,6 +11,8 @@ a hash-chained audit record.
 
 **Live demo: https://decision-engine-mofahds-projects.vercel.app**
 
+**90-second walkthrough: https://www.loom.com/share/eb9dfe81b7024942bbad12ae5ab05327**
+
 Built for the [DOO Builders League Decision Engine challenge](https://build.doo.ooo/challenges/decision-engine).
 
 ---
