@@ -178,7 +178,12 @@ let seeded: Promise<void> | null = null
 export function auditStore(): AuditStore {
   if (singleton) return singleton
 
-  const mode = process.env.AUDIT_STORE ?? (process.env.VERCEL ? 'memory' : 'file')
+  // Trimmed, and an empty value treated as unset. A host that injects the key
+  // with a blank value has not chosen a store: Vercel pre-fills every key it
+  // finds in .env.example, and an empty AUDIT_STORE selecting the file store on
+  // a read-only filesystem would take the whole deployment down.
+  const configured = (process.env.AUDIT_STORE ?? '').trim().toLowerCase()
+  const mode = configured !== '' ? configured : process.env.VERCEL ? 'memory' : 'file'
   singleton =
     mode === 'memory'
       ? new MemoryAuditStore()
@@ -196,10 +201,25 @@ export function auditStore(): AuditStore {
 export async function ensureSeeded(): Promise<void> {
   if (!seeded) {
     seeded = (async () => {
+      const { seedCorpus } = await import('./seed')
       const store = auditStore()
       if ((await store.all()).length > 0) return
-      const { seedCorpus } = await import('./seed')
-      await seedCorpus(store)
+
+      try {
+        await seedCorpus(store)
+      } catch (error) {
+        // A read-only filesystem is a hosting fact, not a reason to serve
+        // errors. Fall back to memory and say so once in the log rather than
+        // failing every decision request for the life of the deployment.
+        if (!(store instanceof FileAuditStore)) throw error
+        console.warn(
+          '[audit] Could not write the audit log to disk, so it is being kept in memory ' +
+            'for this instance. Decisions are unaffected; the log will not survive a restart. ' +
+            `Cause: ${error instanceof Error ? error.message : String(error)}`,
+        )
+        singleton = new MemoryAuditStore()
+        await seedCorpus(singleton)
+      }
     })()
   }
   return seeded

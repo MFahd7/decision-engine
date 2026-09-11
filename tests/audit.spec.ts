@@ -7,9 +7,10 @@
  * extractor.
  */
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { GENESIS_HASH, sealRecord, verifyChain, type AuditRecord } from '@/audit/hashChain'
-import { MemoryAuditStore } from '@/audit/store'
+import { MemoryAuditStore, auditStore, resetAuditStoreForTests } from '@/audit/store'
+import { llmAvailable } from '@/signals/llm/claimExtractor'
 import { replay } from '@/audit/replay'
 import { registry, judge } from '@/engine'
 import { refundsPolicy } from '@/policies/refunds.policy'
@@ -147,5 +148,52 @@ describe('replay', () => {
       ],
     })
     expect(result.replayed).toBe(fixtures.refunds.length)
+  })
+})
+
+/**
+ * Host-injected configuration.
+ *
+ * Vercel pre-fills every key it finds in `.env.example` with an empty value, so
+ * "unset" and "set to nothing" reach the process identically. Reading them with
+ * `??` treats the second as a real choice, which on a read-only filesystem
+ * selects the file store and breaks every request. These pin the behaviour.
+ */
+describe('environment handling', () => {
+  const saved = { ...process.env }
+
+  afterEach(() => {
+    process.env = { ...saved }
+    resetAuditStoreForTests()
+  })
+
+  it('treats an empty AUDIT_STORE on a read-only host as unset, not as a choice', () => {
+    resetAuditStoreForTests()
+    process.env.AUDIT_STORE = ''
+    process.env.VERCEL = '1'
+    expect(auditStore()).toBeInstanceOf(MemoryAuditStore)
+  })
+
+  it('treats a whitespace-only AUDIT_STORE the same way', () => {
+    resetAuditStoreForTests()
+    process.env.AUDIT_STORE = '   '
+    process.env.VERCEL = '1'
+    expect(auditStore()).toBeInstanceOf(MemoryAuditStore)
+  })
+
+  it('still honours an explicit choice, in any casing', () => {
+    resetAuditStoreForTests()
+    process.env.AUDIT_STORE = 'Memory'
+    delete process.env.VERCEL
+    expect(auditStore()).toBeInstanceOf(MemoryAuditStore)
+  })
+
+  it('an empty ANTHROPIC_API_KEY means no key, so the deterministic stub runs', () => {
+    process.env.ANTHROPIC_API_KEY = ''
+    expect(llmAvailable()).toBe(false)
+    process.env.ANTHROPIC_API_KEY = '   '
+    expect(llmAvailable()).toBe(false)
+    process.env.ANTHROPIC_API_KEY = 'sk-ant-whatever'
+    expect(llmAvailable()).toBe(true)
   })
 })

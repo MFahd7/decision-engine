@@ -39,8 +39,15 @@ pushing from another account does not change the attribution.
 Zero configuration. Import the repository at [vercel.com/new](https://vercel.com/new) and accept the
 detected Next.js defaults.
 
-**Do not set any environment variables.** The app is built to run with none, which is the point:
-a judge cloning at midnight with no API key gets a fully working demo, and so does the hosted build.
+**Remove the environment variables Vercel offers to add.** The import screen scrapes every key
+out of `.env.example` and pre-fills all three with blank values, under an "Environment Variables,
+3 Detected" panel. Click the minus button beside each one. The app is built to run with none set,
+which is the point: a judge cloning at midnight with no API key gets a fully working demo, and so
+does the hosted build.
+
+Leaving them in as blanks is harmless as of this commit, because the code now treats an empty value
+as unset and falls back to memory if the log cannot be written. Removing them is still the cleaner
+state, and it is what the README describes.
 
 Two things happen automatically on Vercel:
 

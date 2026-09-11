@@ -49,7 +49,10 @@ export type ClaimRequest = {
 }
 
 export function llmAvailable(): boolean {
-  return Boolean(process.env.ANTHROPIC_API_KEY)
+  // Trimmed: a host that injects the key with a blank value has not supplied
+  // one, and a whitespace-only key would otherwise read as present and then
+  // fail on every call.
+  return (process.env.ANTHROPIC_API_KEY ?? '').trim() !== ''
 }
 
 export async function extractClaim(request: ClaimRequest): Promise<Signal[]> {
@@ -141,7 +144,7 @@ async function callClaude(request: ClaimRequest): Promise<ClaimReading> {
   const client = new Anthropic()
 
   const response = await client.messages.create({
-    model: process.env.DECISION_ENGINE_MODEL || 'claude-opus-5',
+    model: (process.env.DECISION_ENGINE_MODEL ?? '').trim() || 'claude-opus-5',
     max_tokens: 1024,
     // This is a bounded reading task, not a reasoning problem. Low effort keeps
     // it fast and cheap; the kernel is what does the thinking.
