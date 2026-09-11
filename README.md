@@ -31,7 +31,8 @@ for it.
 
 ## Run it
 
-Requires Node 20.9 or newer. No API key, no database, no accounts.
+Built and tested on Node 24.21. `package.json` sets the floor at Node 20.9, which is what Next 16
+requires; versions between the two are untested. No API key, no database, no accounts.
 
 ```bash
 git clone https://github.com/MFahd7/decision-engine.git
@@ -45,7 +46,7 @@ the audit log seeds itself on the first request by running a generated corpus th
 pipeline.
 
 ```bash
-npm test             # 67 tests, including both failure cases
+npm test             # 71 tests, including both failure cases
 npm run typecheck
 npm run build
 ```
@@ -87,7 +88,7 @@ Read left to right: how likely this goes wrong, how stuck we are if it does, how
 and how much of that is genuinely unknown to us.
 
 The units are real. Refunds are denominated in dollars, deploys in users at risk, moderation in
-people reached. So the console says **"$63 of expected regret"** or **"4,548 people reached"**, which
+people reached. So the console says **"$61.96 of expected regret"** or **"4,548 people reached"**, which
 is a quantity a policy owner can argue with.
 
 `reversibility` is where most of the interesting behaviour lives, because it is a property of the
@@ -109,8 +110,10 @@ Nothing about the claim changed.
 
 ## The kernel: six rules, in order
 
-Deterministic, domain-free, about 150 lines in [`core/kernel.ts`](core/kernel.ts). Every rule is
-recorded in the trace whether it fires or not, so the console shows the road not taken.
+Deterministic and domain-free. The ladder itself is about 100 lines of
+[`core/kernel.ts`](core/kernel.ts); the rest of that file builds the counterfactuals and the
+plain-English summary. Every rule is recorded in the trace whether it fires or not, so the console
+shows the road not taken.
 
 | | Rule | Fires when | Verdict |
 |---|---|---|---|
@@ -128,8 +131,8 @@ Absence of a reason to stop is not a reason to go.
 
 ## Two numbers, not one
 
-Most scoring engines collapse "how sure are we" and "does this look justified" into a single
-confidence number. Splitting them is what stops a request with crisp, fresh, unanimous evidence that
+It is tempting to collapse "how sure are we" and "does this look justified" into a single confidence
+number. Splitting them is what stops a request with crisp, fresh, unanimous evidence that
 it is *unjustified* from sailing through a confidence check:
 
 - **confidence** — how well we know the situation. A weighted mean of source confidence, decayed by
@@ -184,8 +187,9 @@ directly at
 
 4. **The replay slider, bottom right.**
    Drag the confidence floor and watch: *"Moving the confidence floor from 72% to 85% would have
-   changed 14 of the last 140 decisions: 14 execute became escalate."* Every one of those was
-   re-judged from its stored signals. No upstream system was contacted and nothing was written back.
+   changed 18 of the last 140 decisions: 18 execute became escalate."* Every one of those was
+   re-judged from its stored signals. The count climbs as you use the console, because every
+   decision you make joins the log you are replaying against. No upstream system was contacted and nothing was written back.
 
 ---
 
@@ -255,7 +259,8 @@ curl -s localhost:3000/api/decide \
 ## Layout
 
 ```
-core/          types · kernel · scoring · naive baseline    (no domain knowledge whatsoever)
+core/          types · kernel · scoring · naive baseline    (no domain logic; the only domain-aware
+               line in the whole directory is the three-name Domain union in types.ts)
 policies/      refunds · deploy · moderation                (thresholds, prohibitions, half-lives)
 signals/       extractors per domain + the optional LLM one (the only impure code)
 audit/         hash chain · store · replay · corpus seeder

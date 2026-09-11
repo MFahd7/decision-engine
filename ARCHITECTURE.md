@@ -82,7 +82,7 @@ calls.
 
 **Replay.** A stored decision plus a different policy pack gives you the verdict that policy would
 have produced. That is what turns "shall we tighten the confidence floor?" into "tightening it to 85%
-would have changed 14 of the last 140 decisions, all of them execute becoming escalate."
+would have changed 18 of the last 140 decisions, all of them execute becoming escalate."
 
 **Determinism under test.** Every fixture pins its own clock in `context.now`, so a scenario decides
 identically on any machine, in any year. The golden test suite is meaningful precisely because a
@@ -106,8 +106,7 @@ produce the same thing, and the kernel cannot tell them apart except by the `sou
 | `source` | `rule` / `data` / `model` / `human`. Visible in the console on every row. |
 | `latencyMs` | What this signal cost to obtain. Recorded, not yet used in decisions. |
 
-Two of these are the ones most entrants will not have, and they do most of the work:
-**per-signal confidence** and **freshness**. Together they let the engine say *"I have strong
+Two of these do most of the work: **per-signal confidence** and **freshness**. Together they let the engine say *"I have strong
 evidence, but it is old, so I am less sure than I look."*
 
 ---
@@ -152,7 +151,8 @@ sources pointing opposite ways is the worst case, because nothing tells you whic
 source against a badly decayed one is barely a conflict at all — decay has already settled it, and
 the penalty is correspondingly small.
 
-Failure test A asserts exactly this, including that the penalty in that scenario is under 10%. The
+Failure test A asserts exactly this, including that the severity in that scenario is under 10%, so
+the penalty it produces is negligible. The
 contradiction is still *recorded* and shown, because a reviewer needs to know two systems disagreed
 even when the arithmetic has already resolved it.
 
@@ -160,8 +160,8 @@ even when the arithmetic has already resolved it.
 
 ## Confidence and support are different numbers
 
-The original plan for this project had one confidence number. That is a hole, and it is worth naming
-because it is a hole most scoring engines have:
+The original plan for this project had one confidence number. That is a hole, and an easy one to
+miss:
 
 - **confidence** — how well we know the situation.
 - **support** — how far what we know argues for acting.
@@ -190,7 +190,9 @@ Everything domain-specific lives in one file per domain and nothing else knows a
 **Moderation's floor is set at 0.75 on purpose.** Model-reported confidence is capped at 0.75 before
 the kernel sees it, so no classifier score — however emphatic — can clear that floor on its own.
 Something a human already ruled on has to be in the mix. In the shipped corpus, moderation reaches
-`execute` only via a perceptual-hash match to a prior, appeal-tested case.
+`execute` only via a content-hash match to a prior, appeal-tested case. The match itself is computed
+upstream and arrives on the envelope as a fact, like every other signal; this engine does not hash
+anything.
 
 Thresholds are plain data, which is what lets `/api/replay` mutate them. Prohibitions, temporal bars
 and the scale functions are predicates over a narrow `PolicyContext` that exposes the envelope and

@@ -74,7 +74,7 @@ cd $(mktemp -d)              # PowerShell: cd (New-Item -ItemType Directory -Pat
 git clone https://github.com/MFahd7/decision-engine.git
 cd decision-engine
 npm install
-npm test                     # expect 67 passing
+npm test                     # expect 71 passing
 npm run build
 npm run dev
 ```

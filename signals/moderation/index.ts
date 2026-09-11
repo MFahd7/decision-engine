@@ -42,7 +42,9 @@ function classifierSignals(envelope: ActionEnvelope): Signal[] {
 }
 
 /**
- * A perceptual-hash match against content a human already ruled on. This is
+ * A content-hash match against material a human already ruled on, as reported by
+ * the platform's hash index. The match arrives on the envelope as a fact; this
+ * engine does not compute hashes, any more than it queries a carrier. It is
  * the one moderation signal that is not a model output and not an opinion, and
  * it is the only route by which this domain reaches enough confidence to act
  * without a person — which is the correct shape for moderation.
@@ -60,7 +62,7 @@ function hashMatchSignals(envelope: ActionEnvelope): Signal[] {
       source: 'human',
       support: 0.95,
       asserts: { proposition: 'content_violates_policy', polarity: true },
-      rationale: `Byte-for-byte match with ${str(envelope, 'hashMatch.caseId', 'a prior case')}, which a human reviewer actioned and which survived appeal.`,
+      rationale: `Content-hash match with ${str(envelope, 'hashMatch.caseId', 'a prior case')}, which a human reviewer actioned and which survived appeal.`,
       latencyMs: 0,
     }),
   ]
